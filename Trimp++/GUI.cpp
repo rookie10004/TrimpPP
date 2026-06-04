@@ -17,7 +17,7 @@ void GUI::Init(SDL_Window* window, SDL_Renderer* renderer)
     std::cout << "GUI: Init successfull" << std::endl;
 }
 
-void GUI::Draw(Display& display)
+void GUI::Draw(Display& display, const DataManager& dataManager)
 {
     //ImGui Frame start
     ImGui_ImplSDLRenderer3_NewFrame();
@@ -25,7 +25,7 @@ void GUI::Draw(Display& display)
     ImGui::NewFrame();
 
     //UI
-    SelectionWindow(display);
+    SelectionWindow(display, dataManager);
     TrainingOverviewWindow(display);
     ZoneWindow(display);
     HeartRateWindow( display);
@@ -67,42 +67,55 @@ void GUI::SetStyle()
     style.Colors[ImGuiCol_PopupBg] = black;
 }
 
-void GUI::SelectionWindow(Display& display)
+void GUI::SelectionWindow(Display& display, const DataManager& dataManager)
 {
-    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() - 750, display.GetHeight()), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.25, display.GetHeight()), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
 
-    ImGui::Begin("selection", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin("Directory: Trimp++/data", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+    
+    ImGui::SeparatorText("Select Workout");
+
+    ImGui::Text("            Date   Time    File");
+    if (ImGui::BeginListBox("##Liste", ImVec2(-FLT_MIN, 520)))
+    {
+        for (int i = 0; i < dataManager.GetFileCount(); i++)
+        {
+            // icon
+            ImGui::Text("icon   19/01/2026  00:00:00    weawda");
+        }
+    }
+    ImGui::EndListBox();
 
     ImGui::End();
 }
 
 void GUI::TrainingOverviewWindow(Display& display)
 {
-    ImGui::SetNextWindowSize(ImVec2(750 / 2, display.GetHeight() * 0.6), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() - 750, display.GetHeight() * 0.4), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.75 / 2, display.GetHeight() * 0.6), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25, display.GetHeight() * 0.4), ImGuiCond_Once);
 
-    ImGui::Begin("overview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin("Overview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImGui::End();
 }
 
 void GUI::ZoneWindow(Display& display)
 {
-    ImGui::SetNextWindowSize(ImVec2(750 / 2, display.GetHeight() * 0.6), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() - 750 / 2, display.GetHeight() * 0.4), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.75 / 2, display.GetHeight() * 0.6), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25 + display.GetWidth() * 0.75 / 2, display.GetHeight() * 0.4), ImGuiCond_Once);
 
-    ImGui::Begin("zones", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin("Zones", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImGui::End();
 }
 
 void GUI::HeartRateWindow(Display& display)
 {
-    ImGui::SetNextWindowSize(ImVec2(750, display.GetHeight() * 0.4), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() - 750, 0), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.75, display.GetHeight() * 0.4), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25, 0), ImGuiCond_Once);
 
-    ImGui::Begin("heart rate", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin("Heart Rate", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
     ImGui::End();
 }

@@ -19,7 +19,10 @@ void Application::Init()
 
 void Application::Setup()
 {
-
+    dataManager.LoadFromCSV("../data/alex_hellebrandt_2026-04-30_22-25-06.csv");
+    /*
+    * Logik: erste Datei im Ordner laden mit LoadFromCSV()
+    */
 }
 
 void Application::InputHandle()
@@ -42,7 +45,7 @@ void Application::Render()
     SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
     SDL_RenderClear(renderer);
 
-    gui.Draw(display);
+    gui.Draw(display, dataManager);
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
 
     SDL_RenderPresent(renderer);

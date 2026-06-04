@@ -5,6 +5,7 @@ int main()
 
 	Application app;
 	app.Init();
+	app.Setup();
 	app.Update();
 
 	while (app.GetIsRunning())

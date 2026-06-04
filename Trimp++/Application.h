@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "Display.h"
 #include "GUI.h"
+#include "DataManager.h"
 
 #include <string>
 #include <iostream>
@@ -11,22 +12,22 @@
 
 class Application
 {
-	private:
-		const char* title = "Trimp++";
+private:
+	const char* title = "Trimp++";
 
-		bool isRunning = true;
+	bool isRunning = true;
 
-		Display display{ title };
-		GUI gui;
-		SDL_Renderer* renderer;
+	Display display{ title };
+	GUI gui;
+	DataManager dataManager;
+	SDL_Renderer* renderer;
 
-	public:
-		void Init();
-		void Setup();
-		bool GetIsRunning() { return isRunning; }
-		void InputHandle();
-		void Render();
-		void Update();
-
+public:
+	void Init();
+	void Setup();
+	bool GetIsRunning() { return isRunning; }
+	void InputHandle();
+	void Render();
+	void Update();
 };
 
