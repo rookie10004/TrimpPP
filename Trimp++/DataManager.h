@@ -7,6 +7,9 @@
 #include <vector>
 #include <filesystem>
 
+#define DIRECTORY "../data/"
+#define AGE 25
+
 struct HeartRateZone
 {
 	// zone parameter
@@ -16,9 +19,22 @@ struct HeartRateZone
 	double duration;		// (min)
 };
 
-struct WorkoutSummary
+struct WorkoutList
 {
 	// data parameter
+	std::string fileName;
+	std::string sport;		// in CAPITAL
+	std::string date;		// format: dd/mm/yy
+};
+
+struct WorkoutSummary
+{
+	// heart rate
+	std::vector<int> hRData;
+	std::vector<double> timeStamps;
+
+	// data parameter
+	std::string fileName;
 	std::string sport;		// in CAPITAL
 	std::string date;		// format: dd/mm/yy
 	std::string startTime;	// format: h:min:s
@@ -27,33 +43,37 @@ struct WorkoutSummary
 	int height;				// (cm)
 	double weight;			// (kg)
 	std::string notes;
+
+	// calculated data parameter
+	int minHR = 999;		// (bpm)
+	int maxHR = 0;			// (bpm)
+	int avarageHR = 0;		// (bpm)
+	double trimp = 0.0;
+	//...
 };
 
 class DataManager
 {
 private:
-	// heart rate
-	std::vector<int> hRData;
-	std::vector<double> timeStamps;
-	int maxHR;				// (bpm)
-	int restHR;				// (bpm)
-	int avarageHR;			// (bpm)
-
+	std::vector<WorkoutList> workoutList;
 	WorkoutSummary workoutSummary;
 
 	// file parameter
+	std::string filePath;
 	int fileCount = 0;
-	
+	bool isDirEmpty = false;
+
+	int hRMax = 220 - AGE;
 
 public:
 	DataManager();
 
-	bool LoadFromCSV(const std::string& filePath);
+	bool LoadDirectory();
+	bool LoadFromCSV(const std::string& fileName);
+	void CalculateTRIMP();
+	void WorkoutSummaryClear();
 
-	int GetFileCount() const { return fileCount; }
+	const std::vector<WorkoutList> GetList() const { return workoutList; }
 	const WorkoutSummary& GetSummary() const { return workoutSummary; }
-	int GetMaxHR() const;
-	int GetRestHR() const;
-	int GetAvarageHR() const;
+	bool GetIsDirEmpty() const { return isDirEmpty; }
 };
-

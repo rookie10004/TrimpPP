@@ -15,14 +15,22 @@ void Application::Init()
     std::cout << "Application: Init successfull" << std::endl;
 
     gui.Init(display.GetWindow(), renderer);
+
+    dataManager.LoadDirectory();
 }
 
 void Application::Setup()
 {
-    dataManager.LoadFromCSV("../data/alex_hellebrandt_2026-04-30_22-25-06.csv");
-    /*
-    * Logik: erste Datei im Ordner laden mit LoadFromCSV()
-    */
+    std::string file;
+
+    for (const auto& entry : std::filesystem::directory_iterator(DIRECTORY))
+    {
+        if (entry.is_regular_file())
+        {
+            file = entry.path().filename().string();
+            dataManager.LoadFromCSV(file);
+        }
+    }
 }
 
 void Application::InputHandle()
@@ -37,7 +45,6 @@ void Application::InputHandle()
             isRunning = false;
         }
     }
-
 }
 
 void Application::Render()
@@ -45,7 +52,7 @@ void Application::Render()
     SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
     SDL_RenderClear(renderer);
 
-    gui.Draw(display, dataManager);
+    gui.Draw(display, dataManager, dataManager.GetIsDirEmpty());
     ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
 
     SDL_RenderPresent(renderer);

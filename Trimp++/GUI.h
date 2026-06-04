@@ -22,12 +22,12 @@ private:
 public:
 	void Init(SDL_Window* window, SDL_Renderer* renderer);
 
-	void Draw(Display& display, const DataManager& dataManager);
+	void Draw(Display& display, DataManager& dataManager, bool isDirEmpty);
 	void SetStyle();
 
-	void SelectionWindow(Display& display, const DataManager& dataManager);
-	void TrainingOverviewWindow(Display& display);
-	void ZoneWindow(Display& display);
-	void HeartRateWindow(Display& display);
+	void SelectionWindow(Display& display, DataManager& dataManager, bool isDirEmpty);
+	void TrainingOverviewWindow(Display& display, DataManager& dataManager);
+	void ZoneWindow(Display& display, DataManager& dataManager);
+	void HeartRateWindow(Display& display, DataManager& dataManager);
 };
 
