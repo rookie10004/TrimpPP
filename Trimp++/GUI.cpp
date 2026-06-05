@@ -4,6 +4,7 @@ void GUI::Init(SDL_Window* window, SDL_Renderer* renderer)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
 
@@ -85,7 +86,7 @@ void GUI::SelectionWindow(Display& display, DataManager& dataManager, bool isDir
         {
             for (int i = 0; i < list.size(); i++)
             {
-                std::string label = list[i].date + "    " + list[i].sport;
+                std::string label = list[i].date + "    " + list[i].sport + "##" + std::to_string(i);
 
                 bool isSelected = (selectedIndex == i);
 
@@ -129,8 +130,16 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     ImGui::Text("Day Time:  %s", list.startTime.c_str());
     ImGui::Text("Calories:  %d", list.calories);
     ImGui::Text("File:      %s", list.fileName.c_str());
-    ImGui::Text("Notes:     ");
-    ImGui::TextWrapped(list.notes.c_str());
+    ImGui::Text("Notes:    ");
+    ImGui::SameLine();
+    if (!list.notes.empty())
+    {
+        ImGui::TextWrapped(list.notes.c_str());
+    }
+    else
+    {
+        ImGui::Text("-");
+    }
 
     ImGui::SeparatorText("Heart Rate Data");
     ImGui::Text("Min HR:    %d", list.minHR);
@@ -149,6 +158,56 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
     ImGui::Begin("Zones", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
+    const auto& summary = dataManager.GetSummary();
+
+    if (summary.hRData.empty())
+    {
+        ImGui::Text("N/A");
+        ImGui::End();
+        return;
+    }
+
+    double zoneCounts[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    const char* zoneLabels[6] = { "Z0 (<50%)", "Z1 (50-60%)", "Z2 (60-70%)", "Z3 (70-80%)", "Z4 (80-90%)", "Z5 (90-100%)" };
+
+    for (int hr : summary.hRData)
+    {
+        double intensity = (static_cast<double>(hr) / dataManager.GetHRMax()) * 100.0;
+
+        if (intensity < 50.0)                               zoneCounts[0]++;
+        else if (intensity >= 50.0 && intensity < 60.0)    zoneCounts[1]++;
+        else if (intensity >= 60.0 && intensity < 70.0)    zoneCounts[2]++;
+        else if (intensity >= 70.0 && intensity < 80.0)    zoneCounts[3]++;
+        else if (intensity >= 80.0 && intensity < 90.0)    zoneCounts[4]++;
+        else if (intensity >= 90.0 && intensity <= 100.0)  zoneCounts[5]++;
+    }
+
+    std::vector<double> activeCounts;
+    std::vector<const char*> activeLabels;
+
+    for (int i = 0; i < 6; ++i)
+    {
+        if (zoneCounts[i] > 0.0)
+        {
+            activeCounts.push_back(zoneCounts[i]);
+            activeLabels.push_back(zoneLabels[i]);
+        }
+    }
+
+    ImVec2 plotSize = ImGui::GetContentRegionAvail();
+
+    if (ImPlot::BeginPlot("##ZonesPie", plotSize, ImPlotFlags_NoInputs | ImPlotFlags_NoMouseText | ImPlotFlags_NoTitle | ImPlotFlags_Equal))
+    {
+        ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
+        ImPlot::SetupLegend(ImPlotLocation_NorthEast, ImPlotLegendFlags_None);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, 1.0, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1.0, ImGuiCond_Always);
+
+        ImPlot::PlotPieChart(activeLabels.data(), activeCounts.data(), static_cast<int>(activeCounts.size()), 0.5, 0.5, 0.44f, "%.0f sec", 180.0);
+
+        ImPlot::EndPlot();
+    }
+
     ImGui::End();
 }
 
@@ -158,6 +217,36 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
     ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25, 0), ImGuiCond_Once);
 
     ImGui::Begin("Heart Rate", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
+
+    const auto& summary = dataManager.GetSummary();
+
+    if (summary.hRData.empty() || summary.timeStamps.empty())
+    {
+        ImGui::Text("N/A");
+        ImGui::End();
+        return;
+    }
+    
+    ImVec2 plotSize = ImGui::GetContentRegionAvail();
+
+    if (ImPlot::BeginPlot("##HeartRatePlot", plotSize))
+    {
+        ImPlot::SetupAxes("Time [sec]", "Heart Rate [bpm]");
+
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, summary.timeStamps.back(), ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, summary.minHR - 10, summary.maxHR + 10, ImGuiCond_Always);
+
+        std::vector<double> timeStampsD(summary.timeStamps.begin(), summary.timeStamps.end());
+        std::vector<double> hRDataD(summary.hRData.begin(), summary.hRData.end());
+        ImPlot::PlotLine("##HeartRate", timeStampsD.data(), hRDataD.data(), static_cast<int>(hRDataD.size()));
+
+        if (summary.maxHR > 0) // logik fehler
+        {
+            // logik für peaks makieren
+        }
+
+        ImPlot::EndPlot();
+    }
 
     ImGui::End();
 }

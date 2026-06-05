@@ -76,4 +76,5 @@ public:
 	const std::vector<WorkoutList> GetList() const { return workoutList; }
 	const WorkoutSummary& GetSummary() const { return workoutSummary; }
 	bool GetIsDirEmpty() const { return isDirEmpty; }
+	const int GetHRMax() const { return hRMax; }
 };

@@ -138,6 +138,8 @@
     <ClCompile Include="..\libs\imgui\imgui-master\imgui_draw.cpp" />
     <ClCompile Include="..\libs\imgui\imgui-master\imgui_tables.cpp" />
     <ClCompile Include="..\libs\imgui\imgui-master\imgui_widgets.cpp" />
+    <ClCompile Include="..\libs\imgui\imgui-master\implot.cpp" />
+    <ClCompile Include="..\libs\imgui\imgui-master\implot_items.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="Display.cpp" />
@@ -145,6 +147,10 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\libs\imgui\imgui-master\imconfig.h" />
+    <ClInclude Include="..\libs\imgui\imgui-master\imgui.h" />
+    <ClInclude Include="..\libs\imgui\imgui-master\implot.h" />
+    <ClInclude Include="..\libs\imgui\imgui-master\implot_internal.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="DataManager.h" />
     <ClInclude Include="Display.h" />

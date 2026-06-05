@@ -1,6 +1,7 @@
 #pragma once
 
 #include <imgui.h>
+#include <implot.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_sdlrenderer3.h>
 #include <SDL3/SDL.h>
@@ -20,6 +21,7 @@ private:
 	ImVec4 darkGrey = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
 public:
+
 	void Init(SDL_Window* window, SDL_Renderer* renderer);
 
 	void Draw(Display& display, DataManager& dataManager, bool isDirEmpty);

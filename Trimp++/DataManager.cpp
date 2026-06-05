@@ -170,31 +170,22 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
     // column 4
     while (std::getline(file, line))
     {
-        std::vector<std::string> liveColumns;
+        if (line.empty()) continue;
+
         std::stringstream ss(line);
-        std::string field;
+        std::string sampleRate;
+        std::string timeStr;
+        std::string hrStr;
 
-        while (std::getline(ss, field, ','))
+        if (std::getline(ss, sampleRate, ',') &&
+            std::getline(ss, timeStr, ',') &&
+            std::getline(ss, hrStr, ','))
         {
-            liveColumns.push_back(field);
-        }
-
-        /* mapping
-           index 0: sample rate
-           index 1: time (format: h:min:s)
-           index 2: HR (bpm)
-        */
-        if (liveColumns.size() > 2)
-        {
-            std::string timeStr = liveColumns[1];
-            std::string hrStr = liveColumns[2];
-
             if (!hrStr.empty() && !timeStr.empty())
             {
                 try
                 {
                     int hr = std::stoi(hrStr);
-                    workoutSummary.hRData.push_back(hr);
 
                     int hours = 0, minutes = 0, seconds = 0;
                     std::stringstream timeSS(timeStr);
@@ -205,6 +196,8 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
                     if (std::getline(timeSS, chunk, ':')) seconds = std::stoi(chunk);
 
                     double totalSeconds = (hours * 3600.0) + (minutes * 60.0) + seconds;
+
+                    workoutSummary.hRData.push_back(hr);
                     workoutSummary.timeStamps.push_back(totalSeconds);
                 }
                 catch (...)
