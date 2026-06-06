@@ -153,9 +153,7 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     if (!list.hRData.empty() && list.minHRIndex >= 0 && list.minHRIndex < list.hRData.size())
     {
         ImGui::SameLine(190.0f);
-        ImGui::Text("Time:          %-6.0f", list.hRData[list.minHRIndex].timeStamp);
-        ImGui::SameLine(340.0f);
-        ImGui::Text("sec");
+        ImGui::Text("Time:          %s", list.minHRTime.c_str());
     }
 
     ImGui::Text("Max HR:       %d", list.maxHR);
@@ -165,9 +163,7 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     if (!list.hRData.empty() && list.maxHRIndex >= 0 && list.maxHRIndex < list.hRData.size())
     {
         ImGui::SameLine(190.0f);
-        ImGui::Text("Time:          %-6.0f", list.hRData[list.maxHRIndex].timeStamp);
-        ImGui::SameLine(340.0f);
-        ImGui::Text("sec");
+        ImGui::Text("Time:          %s", list.maxHRTime.c_str());
     }
 
     ImGui::Text("TRIMP:        %-7.1f", list.trimp);
@@ -232,7 +228,7 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
         ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, 1.0, ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1.0, ImGuiCond_Always);
 
-        ImPlot::PlotPieChart(activeLabels.data(), activeCounts.data(), static_cast<int>(activeCounts.size()), 0.5, 0.5, 0.44f, "%.0f sec", 180.0);
+        ImPlot::PlotPieChart(activeLabels.data(), activeCounts.data(), static_cast<int>(activeCounts.size()), 0.5, 0.5, 0.44f, "%.1f min", 180.0);
 
         ImPlot::EndPlot();
     }
@@ -264,14 +260,14 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
     {
         ImPlot::SetupAxes("Time [sec]", "Heart Rate [bpm]");
 
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().timeStamp, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().time, ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, data.minHR - 10, data.maxHR + 15, ImGuiCond_Always);
 
         std::vector<double> timeStamps, heartRates;
         timeStamps.reserve(data.hRData.size());
         heartRates.reserve(data.hRData.size());
         for (const auto& hr : data.hRData) {
-            timeStamps.push_back(hr.timeStamp);
+            timeStamps.push_back(hr.time);
             heartRates.push_back(static_cast<double>(hr.hR));
         }
 
@@ -279,7 +275,7 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
         if (data.maxHR > 0 && !data.hRData.empty())
         {
-            double peakX = data.hRData[data.maxHRIndex].timeStamp;
+            double peakX = data.hRData[data.maxHRIndex].time;
             double peakY = data.maxHR;
 
             ImPlotSpec spec;

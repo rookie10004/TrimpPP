@@ -30,16 +30,15 @@ private:
         IM_COL32(242, 45,  5, 255)   // rot
     };
 
-public:
-
-	void Init(SDL_Window* window, SDL_Renderer* renderer);
-
-	void Draw(Display& display, DataManager& dataManager, bool isDirEmpty);
-	void SetStyle();
-
 	void SelectionWindow(Display& display, DataManager& dataManager, bool isDirEmpty);
 	void TrainingOverviewWindow(Display& display, DataManager& dataManager);
 	void ZoneWindow(Display& display, DataManager& dataManager);
 	void HeartRateWindow(Display& display, DataManager& dataManager);
+
+public:
+	void Init(SDL_Window* window, SDL_Renderer* renderer);
+
+	void Draw(Display& display, DataManager& dataManager, bool isDirEmpty);
+	void SetStyle();
 };
 

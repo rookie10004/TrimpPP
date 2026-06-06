@@ -15,7 +15,7 @@ struct HRData
 {
 	// HR parameter
 	int hR;					// bpm
-	double timeStamp;		// sec
+	int time;				// sec
 };
 
 struct WorkoutList
@@ -31,7 +31,7 @@ struct WorkoutData
 	// HR data
 	std::vector<HRData> hRData;
 	std::vector<HRData> peaksData;
-	std::array<double, 6> zoneDurations = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	std::array<double, 6> zoneDurations = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // min
 
 	// constants
 	std::array<int, 6> zones;
@@ -53,6 +53,8 @@ struct WorkoutData
 	int maxHR;				// (bpm)
 	int minHRIndex;
 	int maxHRIndex;
+	std::string minHRTime;
+	std::string maxHRTime;
 
 	// calculated Score parameter
 	double trimp;
@@ -108,6 +110,7 @@ private:
 	void CalculateRecovery();
 	void CalculatePerformance();
 	void WorkoutDataClear();
+	std::string ConvertTimeToString(int totalSeconds);
 
 public:
 	DataManager();
@@ -119,5 +122,4 @@ public:
 	const WorkoutData& GetData() const { return workoutData; }
 	bool GetIsDirEmpty() const { return isDirEmpty; }
 	const int GetHRMax() const { return hRMax; }
-	std::string ConvertTime(double time); // in min (missing...)
 };

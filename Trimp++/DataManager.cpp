@@ -98,7 +98,6 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
 		return false;
 	}
 
-
 	std::string line;
 
     // column 1
@@ -197,7 +196,7 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
                     if (std::getline(timeSS, chunk, ':')) minutes = std::stoi(chunk);
                     if (std::getline(timeSS, chunk, ':')) seconds = std::stoi(chunk);
 
-                    double totalSeconds = (hours * 3600.0) + (minutes * 60.0) + seconds;
+                    int totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
 
                     workoutData.hRData.push_back({ hr, totalSeconds });
                 }
@@ -231,6 +230,12 @@ void DataManager::CalculateZoneDuration()
         else if (intensity >= z3 && intensity < z4) workoutData.zoneDurations[4]++;
         else if (intensity >= z4 && intensity <= z5) workoutData.zoneDurations[5]++;
     }
+    workoutData.zoneDurations[0] /= 60;
+    workoutData.zoneDurations[1] /= 60;
+    workoutData.zoneDurations[2] /= 60;
+    workoutData.zoneDurations[3] /= 60;
+    workoutData.zoneDurations[4] /= 60;
+    workoutData.zoneDurations[5] /= 60;
 }
 
 void DataManager::CalculateTrimp()
@@ -258,7 +263,6 @@ void DataManager::CalculateTrimp()
         {
             workoutData.minHR = hr;
             workoutData.minHRIndex = i;
-
         }
 
         double intensity = (static_cast<double>(hr) / hRMax) * 100.0;
@@ -298,6 +302,9 @@ void DataManager::CalculateTrimp()
     {
         workoutData.avarageHR = totalHR / totalCount;
     }
+
+    workoutData.minHRTime = ConvertTimeToString(workoutData.hRData[workoutData.minHRIndex].time);
+    workoutData.maxHRTime = ConvertTimeToString(workoutData.hRData[workoutData.maxHRIndex].time);
 
     workoutData.trimp = totalTrimp / 60.0;
 }
@@ -343,4 +350,18 @@ void DataManager::WorkoutDataClear()
     workoutData.peaksNorm = -1.0;
     workoutData.recovery = -1;
     workoutData.recoveryNorm = -1;
+    workoutData.performance = -1.0;
 }
+
+std::string DataManager::ConvertTimeToString(int totalSeconds)
+{
+    int hours = totalSeconds / 3600;
+    int minutes = (totalSeconds % 3600) / 60;
+    int seconds = totalSeconds % 60;
+
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(2) << hours << ":" << std::setw(2) << minutes << ":" << std::setw(2) << seconds;
+
+    return oss.str();
+}
+
