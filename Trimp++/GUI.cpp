@@ -9,7 +9,7 @@ void GUI::Init(SDL_Window* window, SDL_Renderer* renderer)
     ImGuiIO& io = ImGui::GetIO();
 
     ImGui::StyleColorsDark();
-    //SetStyle();
+    SetStyle();
 
     // SDL3 backend Init
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
@@ -36,7 +36,7 @@ void GUI::Draw(Display& display, DataManager& dataManager, bool isDirEmpty)
 
 void GUI::SetStyle()
 {
-    ImGuiStyle& style = ImGui::GetStyle();
+    /*ImGuiStyle& style = ImGui::GetStyle();
 
     style.Colors[ImGuiCol_WindowBg] = black;
 
@@ -64,7 +64,9 @@ void GUI::SetStyle()
     style.Colors[ImGuiCol_HeaderActive] = superLightGrey;
     style.Colors[ImGuiCol_HeaderHovered] = lightGrey;
 
-    style.Colors[ImGuiCol_PopupBg] = black;
+    style.Colors[ImGuiCol_PopupBg] = black;*/
+
+    ImPlot::AddColormap("CustomZoneColors", customColors, 6);
 }
 
 void GUI::SelectionWindow(Display& display, DataManager& dataManager, bool isDirEmpty)
@@ -124,13 +126,13 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     WorkoutSummary list = dataManager.GetSummary();
 
     ImGui::SeparatorText("Basic Data");
-    ImGui::Text("Sport:     %s", list.sport.c_str());
-    ImGui::Text("Date:      %s", list.date.c_str());
-    ImGui::Text("Duration:  %s", list.duration.c_str());
-    ImGui::Text("Day Time:  %s", list.startTime.c_str());
-    ImGui::Text("Calories:  %d", list.calories);
-    ImGui::Text("File:      %s", list.fileName.c_str());
-    ImGui::Text("Notes:    ");
+    ImGui::Text("Sport:        %s", list.sport.c_str());
+    ImGui::Text("Date:         %s", list.date.c_str());
+    ImGui::Text("Duration:     %s", list.duration.c_str());
+    ImGui::Text("Day Time:     %s", list.startTime.c_str());
+    ImGui::Text("Calories:     %d kcal", list.calories);
+    ImGui::Text("File:         %s", list.fileName.c_str());
+    ImGui::Text("Notes:       ");
     ImGui::SameLine();
     if (!list.notes.empty())
     {
@@ -142,11 +144,33 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     }
 
     ImGui::SeparatorText("Heart Rate Data");
-    ImGui::Text("Min HR:    %d", list.minHR);
-    ImGui::Text("Max HR:    %d", list.maxHR);
-    ImGui::Text("Avg HR:    %d", list.avarageHR);
-    ImGui::Text("TRIMP:     %.1f", list.trimp);
-    //...
+    ImGui::Text("Avg HR:       %d", list.avarageHR);
+    ImGui::SameLine(134.0f);
+    ImGui::Text("bpm");
+    ImGui::Text("Min HR:       %d", list.minHR);
+    ImGui::SameLine(134.0f);
+    ImGui::Text("bpm");
+    ImGui::SameLine(190.0f);
+    ImGui::Text("Time:          %-6.0f", list.timeStamps[list.minHRIndex]);
+    ImGui::SameLine(340.0f);
+    ImGui::Text("sec");
+    ImGui::Text("Max HR:       %d", list.maxHR);
+    ImGui::SameLine(134.0f);
+    ImGui::Text("bpm");
+    ImGui::SameLine(190.0f);
+    ImGui::Text("Time:          %-6.0f", list.timeStamps[list.maxHRIndex]);
+    ImGui::SameLine(340.0f);
+    ImGui::Text("sec");
+    ImGui::Text("TRIMP:        %-7.1f", list.trimp);
+    ImGui::SameLine(190.0f);
+    ImGui::Text("TRIMP norm:    %-7.1f", list.trimp); // gapfiller parameter
+    ImGui::Text("Peaks:        %-7.1f", list.trimp);
+    ImGui::SameLine(190.0f);
+    ImGui::Text("Peaks norm:    %-7.1f", list.trimp);
+    ImGui::Text("Recovery:     %-7.1f", list.trimp);
+    ImGui::SameLine(190.0f);
+    ImGui::Text("Recovery norm: %-7.1f", list.trimp);
+    ImGui::Text("Performance:  %-7.1f", list.trimp);
 
     ImGui::End();
 }
@@ -196,6 +220,8 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
     ImVec2 plotSize = ImGui::GetContentRegionAvail();
 
+    ImPlot::PushColormap("CustomZoneColors");
+
     if (ImPlot::BeginPlot("##ZonesPie", plotSize, ImPlotFlags_NoInputs | ImPlotFlags_NoMouseText | ImPlotFlags_NoTitle | ImPlotFlags_Equal))
     {
         ImPlot::SetupAxes(nullptr, nullptr, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations);
@@ -207,6 +233,8 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
         ImPlot::EndPlot();
     }
+
+    ImPlot::PopColormap();
 
     ImGui::End();
 }
@@ -234,18 +262,32 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
         ImPlot::SetupAxes("Time [sec]", "Heart Rate [bpm]");
 
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, summary.timeStamps.back(), ImGuiCond_Always);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, summary.minHR - 10, summary.maxHR + 10, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, summary.minHR - 10, summary.maxHR + 15, ImGuiCond_Always);
 
         std::vector<double> timeStampsD(summary.timeStamps.begin(), summary.timeStamps.end());
         std::vector<double> hRDataD(summary.hRData.begin(), summary.hRData.end());
-        ImPlot::PlotLine("##HeartRate", timeStampsD.data(), hRDataD.data(), static_cast<int>(hRDataD.size()));
+        ImPlot::PlotLine("HR##HeartRate", timeStampsD.data(), hRDataD.data(), static_cast<int>(hRDataD.size()));
 
-        if (summary.maxHR > 0) // logik fehler
+        if (summary.maxHR > 0 && !hRDataD.empty())
         {
-            // logik für peaks makieren
+            double peakX = summary.maxHRIndex;
+            double peakY = summary.maxHR;
+
+            ImPlotSpec spec;
+            spec.Marker = ImPlotMarker_Circle;
+            spec.MarkerSize = 3.0f;
+            spec.MarkerLineColor = ImVec4(1.0f, 0.25f, 0.25f, 1.0f);
+            spec.MarkerFillColor = ImVec4(1.0f, 0.25f, 0.25f, 1.0f);
+
+            ImPlot::PlotScatter("Max HR", &peakX, &peakY, 1, spec);
+
+            //std::string labelText = std::to_string(summary.maxHR) + " bpm";
+            //ImPlot::PlotText(labelText.c_str(), peakX, peakY, ImVec2(0, -10));
         }
 
         ImPlot::EndPlot();
+
+        //logik für checkbox die jeden peak ab grenze makiert
     }
 
     ImGui::End();

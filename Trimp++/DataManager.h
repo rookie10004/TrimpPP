@@ -45,11 +45,17 @@ struct WorkoutSummary
 	std::string notes;
 
 	// calculated data parameter
-	int minHR = 999;		// (bpm)
-	int maxHR = 0;			// (bpm)
-	int avarageHR = 0;		// (bpm)
-	double trimp = 0.0;
-	//...
+	int minHR;				// (bpm)
+	int minHRIndex;
+	int maxHR;				// (bpm)
+	int maxHRIndex;
+	int avarageHR;			// (bpm)
+	double trimp;
+	double trimpNorm;
+	double peaks;
+	double peaksNorm;
+	double recovery;
+	double recoveryNorm;
 };
 
 class DataManager
@@ -65,13 +71,17 @@ private:
 
 	int hRMax = 220 - AGE;
 
+	void CalculateTrimp();
+	void CalculatePeaks();
+	void CalculateRecovery();
+	void CalculatePerformance();
+	void WorkoutSummaryClear();
+
 public:
 	DataManager();
 
 	bool LoadDirectory();
 	bool LoadFromCSV(const std::string& fileName);
-	void CalculateTRIMP();
-	void WorkoutSummaryClear();
 
 	const std::vector<WorkoutList> GetList() const { return workoutList; }
 	const WorkoutSummary& GetSummary() const { return workoutSummary; }

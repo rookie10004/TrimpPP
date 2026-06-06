@@ -209,12 +209,12 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
     }
     file.close();
 
-    CalculateTRIMP();
+    CalculateTrimp();
 
     return false;
 }
 
-void DataManager::CalculateTRIMP()
+void DataManager::CalculateTrimp()
 {
 /* max HR ~= 220 - age
           ~= 200 - 25 = 195
@@ -241,10 +241,13 @@ void DataManager::CalculateTRIMP()
         if (hr > workoutSummary.maxHR)
         {
             workoutSummary.maxHR = hr;
+            workoutSummary.maxHRIndex = totalCount;
         }
         if (hr < workoutSummary.minHR)
         {
             workoutSummary.minHR = hr;
+            workoutSummary.minHRIndex = totalCount;
+
         }
 
         double intensity = (static_cast<double>(hr) / hRMax) * 100.0;
@@ -292,17 +295,24 @@ void DataManager::WorkoutSummaryClear()
 {
     workoutSummary.hRData.clear();
     workoutSummary.timeStamps.clear();
-    workoutSummary.avarageHR = 0;
-    workoutSummary.calories = 0;
+    workoutSummary.sport = "";
     workoutSummary.date = "";
     workoutSummary.duration = "";
     workoutSummary.fileName = "";
-    workoutSummary.height = 0;
+    workoutSummary.calories = -1;
+    workoutSummary.height = -1;
+    workoutSummary.weight = -1.0;
     workoutSummary.notes = "";
-    workoutSummary.sport = "";
     workoutSummary.startTime = "";
-    workoutSummary.trimp = 0.0;
-    workoutSummary.weight = 0.0;
-    workoutSummary.maxHR = 0;
     workoutSummary.minHR = 999;
+    workoutSummary.minHRIndex = 0;
+    workoutSummary.maxHR = -1;
+    workoutSummary.maxHRIndex = 0;
+    workoutSummary.avarageHR = -1;
+    workoutSummary.trimp = -1.0;
+    workoutSummary.trimpNorm = -1.0;
+    workoutSummary.peaks = -1.0;
+    workoutSummary.peaksNorm = -1.0;
+    workoutSummary.recovery = -1.0;
+    workoutSummary.recoveryNorm = -1.0;
 }

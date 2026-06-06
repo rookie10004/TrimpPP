@@ -20,6 +20,16 @@ private:
 	ImVec4 superLightGrey = ImVec4(0.7f, 0.7f, 0.7f, 1.0f);
 	ImVec4 darkGrey = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
+	const ImU32 customColors[6] =
+    {
+        IM_COL32(170, 170, 170, 255),// hellgrau
+        IM_COL32(92, 92,  92, 255),  // dunkelgrau
+        IM_COL32(59, 130, 255, 255), // blau
+        IM_COL32(53, 145, 28, 255),  // grün
+        IM_COL32(250, 136, 22, 255), // orange
+        IM_COL32(242, 45,  5, 255)   // rot
+    };
+
 public:
 
 	void Init(SDL_Window* window, SDL_Renderer* renderer);
