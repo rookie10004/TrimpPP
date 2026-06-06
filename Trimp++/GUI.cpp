@@ -123,7 +123,7 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
 
     ImGui::Begin("Overview", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
-    WorkoutSummary list = dataManager.GetSummary();
+    WorkoutData list = dataManager.GetData();
 
     ImGui::SeparatorText("Basic Data");
     ImGui::Text("Sport:        %s", list.sport.c_str());
@@ -150,27 +150,36 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     ImGui::Text("Min HR:       %d", list.minHR);
     ImGui::SameLine(134.0f);
     ImGui::Text("bpm");
-    ImGui::SameLine(190.0f);
-    ImGui::Text("Time:          %-6.0f", list.timeStamps[list.minHRIndex]);
-    ImGui::SameLine(340.0f);
-    ImGui::Text("sec");
+    if (!list.hRData.empty() && list.minHRIndex >= 0 && list.minHRIndex < list.hRData.size())
+    {
+        ImGui::SameLine(190.0f);
+        ImGui::Text("Time:          %-6.0f", list.hRData[list.minHRIndex].timeStamp);
+        ImGui::SameLine(340.0f);
+        ImGui::Text("sec");
+    }
+
     ImGui::Text("Max HR:       %d", list.maxHR);
     ImGui::SameLine(134.0f);
     ImGui::Text("bpm");
-    ImGui::SameLine(190.0f);
-    ImGui::Text("Time:          %-6.0f", list.timeStamps[list.maxHRIndex]);
-    ImGui::SameLine(340.0f);
-    ImGui::Text("sec");
+
+    if (!list.hRData.empty() && list.maxHRIndex >= 0 && list.maxHRIndex < list.hRData.size())
+    {
+        ImGui::SameLine(190.0f);
+        ImGui::Text("Time:          %-6.0f", list.hRData[list.maxHRIndex].timeStamp);
+        ImGui::SameLine(340.0f);
+        ImGui::Text("sec");
+    }
+
     ImGui::Text("TRIMP:        %-7.1f", list.trimp);
     ImGui::SameLine(190.0f);
-    ImGui::Text("TRIMP norm:    %-7.1f", list.trimp); // gapfiller parameter
-    ImGui::Text("Peaks:        %-7.1f", list.trimp);
+    ImGui::Text("TRIMP norm:    %-7.1f", list.trimp);
+    ImGui::Text("Peaks:        %d", list.peaks);
     ImGui::SameLine(190.0f);
-    ImGui::Text("Peaks norm:    %-7.1f", list.trimp);
-    ImGui::Text("Recovery:     %-7.1f", list.trimp);
+    ImGui::Text("Peaks norm:    %-7.1f", list.peaksNorm);
+    ImGui::Text("Recovery:     %d", list.recovery);
     ImGui::SameLine(190.0f);
-    ImGui::Text("Recovery norm: %-7.1f", list.trimp);
-    ImGui::Text("Performance:  %-7.1f", list.trimp);
+    ImGui::Text("Recovery norm: %d", list.recoveryNorm);
+    ImGui::Text("Performance:  %-7.1f", list.performance);
 
     ImGui::End();
 }
@@ -182,39 +191,33 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
     ImGui::Begin("Zones", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
-    const auto& summary = dataManager.GetSummary();
+    const auto& data = dataManager.GetData();
 
-    if (summary.hRData.empty())
+    if (data.hRData.empty())
     {
         ImGui::Text("N/A");
         ImGui::End();
         return;
     }
 
-    double zoneCounts[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    const char* zoneLabels[6] = { "Z0 (<50%)", "Z1 (50-60%)", "Z2 (60-70%)", "Z3 (70-80%)", "Z4 (80-90%)", "Z5 (90-100%)" };
-
-    for (int hr : summary.hRData)
-    {
-        double intensity = (static_cast<double>(hr) / dataManager.GetHRMax()) * 100.0;
-
-        if (intensity < 50.0)                               zoneCounts[0]++;
-        else if (intensity >= 50.0 && intensity < 60.0)    zoneCounts[1]++;
-        else if (intensity >= 60.0 && intensity < 70.0)    zoneCounts[2]++;
-        else if (intensity >= 70.0 && intensity < 80.0)    zoneCounts[3]++;
-        else if (intensity >= 80.0 && intensity < 90.0)    zoneCounts[4]++;
-        else if (intensity >= 90.0 && intensity <= 100.0)  zoneCounts[5]++;
-    }
+    std::string zoneLabels[6] = {
+        "Z0 (<" + std::to_string(data.zones[0]) + "%)",
+        "Z1 (" + std::to_string(data.zones[0]) + "-" + std::to_string(data.zones[1]) + "%)",
+        "Z2 (" + std::to_string(data.zones[1]) + "-" + std::to_string(data.zones[2]) + "%)",
+        "Z3 (" + std::to_string(data.zones[2]) + "-" + std::to_string(data.zones[3]) + "%)",
+        "Z4 (" + std::to_string(data.zones[3]) + "-" + std::to_string(data.zones[4]) + "%)",
+        "Z5 (" + std::to_string(data.zones[4]) + "-" + std::to_string(data.zones[5]) + "%)"
+    };
 
     std::vector<double> activeCounts;
     std::vector<const char*> activeLabels;
 
     for (int i = 0; i < 6; ++i)
     {
-        if (zoneCounts[i] > 0.0)
+        if (data.zoneDurations[i] > 0.0)
         {
-            activeCounts.push_back(zoneCounts[i]);
-            activeLabels.push_back(zoneLabels[i]);
+            activeCounts.push_back(data.zoneDurations[i]);
+            activeLabels.push_back(zoneLabels[i].c_str());
         }
     }
 
@@ -246,9 +249,9 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
     ImGui::Begin("Heart Rate", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
-    const auto& summary = dataManager.GetSummary();
+    const auto& data = dataManager.GetData();
 
-    if (summary.hRData.empty() || summary.timeStamps.empty())
+    if (data.hRData.empty())
     {
         ImGui::Text("N/A");
         ImGui::End();
@@ -261,17 +264,23 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
     {
         ImPlot::SetupAxes("Time [sec]", "Heart Rate [bpm]");
 
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, summary.timeStamps.back(), ImGuiCond_Always);
-        ImPlot::SetupAxisLimits(ImAxis_Y1, summary.minHR - 10, summary.maxHR + 15, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().timeStamp, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_Y1, data.minHR - 10, data.maxHR + 15, ImGuiCond_Always);
 
-        std::vector<double> timeStampsD(summary.timeStamps.begin(), summary.timeStamps.end());
-        std::vector<double> hRDataD(summary.hRData.begin(), summary.hRData.end());
-        ImPlot::PlotLine("HR##HeartRate", timeStampsD.data(), hRDataD.data(), static_cast<int>(hRDataD.size()));
+        std::vector<double> timeStamps, heartRates;
+        timeStamps.reserve(data.hRData.size());
+        heartRates.reserve(data.hRData.size());
+        for (const auto& hr : data.hRData) {
+            timeStamps.push_back(hr.timeStamp);
+            heartRates.push_back(static_cast<double>(hr.hR));
+        }
 
-        if (summary.maxHR > 0 && !hRDataD.empty())
+        ImPlot::PlotLine("HR##HeartRate", timeStamps.data(), heartRates.data(), static_cast<int>(timeStamps.size()));
+
+        if (data.maxHR > 0 && !data.hRData.empty())
         {
-            double peakX = summary.maxHRIndex;
-            double peakY = summary.maxHR;
+            double peakX = data.hRData[data.maxHRIndex].timeStamp;
+            double peakY = data.maxHR;
 
             ImPlotSpec spec;
             spec.Marker = ImPlotMarker_Circle;
@@ -281,7 +290,7 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
             ImPlot::PlotScatter("Max HR", &peakX, &peakY, 1, spec);
 
-            //std::string labelText = std::to_string(summary.maxHR) + " bpm";
+            //std::string labelText = std::to_string(data.maxHR) + " bpm";
             //ImPlot::PlotText(labelText.c_str(), peakX, peakY, ImVec2(0, -10));
         }
 
