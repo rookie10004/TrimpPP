@@ -222,9 +222,9 @@ void DataManager::AnalyzeWorkoutData()
         return;
     }
 
-    long long totalHR = 0.0;
+    long long totalHR = 0;
 
-    for (int i = 0; i < workoutData.hRData.size(); ++i)
+    for (int i = 0; i < workoutData.hRData.size() - 1; ++i)
     {
         totalHR += workoutData.hRData[i].hR;
 
@@ -243,15 +243,35 @@ void DataManager::AnalyzeWorkoutData()
         double intensity = (static_cast<double>(workoutData.hRData[i].hR) / hRMax) * 100.0;
 
         // peaks
-        if (i > 0 && i < workoutData.hRData.size() - 1)
+        if (i > 0 && i < workoutData.hRData.size() - 1 && intensity >= z0)
         {
+            int currentHR = workoutData.hRData[i].hR;
             int prevHR = workoutData.hRData[i - 1].hR;
-            int nextHR = workoutData.hRData[i + 1].hR;
 
-            if (workoutData.hRData[i].hR > prevHR && workoutData.hRData[i].hR > nextHR && intensity >= z0)
+            if (currentHR > prevHR)
             {
-                workoutData.peaksData.push_back(workoutData.hRData[i]);
-                workoutData.peaks++;
+                int forwardIndex = i + 1;
+                while (forwardIndex < workoutData.hRData.size() && workoutData.hRData[forwardIndex].hR == currentHR)
+                {
+                    forwardIndex++;
+                }
+
+                if (forwardIndex < workoutData.hRData.size())
+                {
+                    int nextHRAfterPlateau = workoutData.hRData[forwardIndex].hR;
+
+                    if (currentHR > nextHRAfterPlateau)
+                    {
+                        workoutData.peaksData.push_back(workoutData.hRData[i]);
+                        workoutData.peaks++;
+                    }
+
+                    i = forwardIndex - 1;
+                }
+                else
+                {
+                    i = forwardIndex - 1;
+                }
             }
         }
 

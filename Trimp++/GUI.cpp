@@ -339,16 +339,86 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
         ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().time, ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, data.minHR - 10, data.maxHR + 15, ImGuiCond_Always);
 
-        std::vector<double> timeStamps, heartRates;
-        timeStamps.reserve(data.hRData.size());
-        heartRates.reserve(data.hRData.size());
-        for (const auto& hr : data.hRData) {
-            timeStamps.push_back(hr.time);
-            heartRates.push_back(static_cast<double>(hr.hR));
+        // avgHR line
+        if (data.avarageHR > 0 && !data.hRData.empty())
+        {
+            double avgX[2] = { 0.0, static_cast<double>(data.hRData.back().time) };
+            double avgY[2] = { static_cast<double>(data.avarageHR), static_cast<double>(data.avarageHR) };
+
+            ImPlotSpec spec;
+            spec.LineColor = ImVec4(1.0f, 1.0f, 1.0f, 0.7f);
+            spec.LineWeight = 1.0f;
+
+            ImPlot::HideNextItem(true, ImPlotCond_Once);
+            ImPlot::PlotLine("Avg HR##AvgHRLine", avgX, avgY, 2, spec);
         }
 
-        ImPlot::PlotLine("HR##HeartRate", timeStamps.data(), heartRates.data(), static_cast<int>(timeStamps.size()));
+        // HR
+        if (data.hRData.size() >= 2)
+        {
+            bool legendShown = false;
 
+            for (size_t i = 0; i < data.hRData.size() - 1; ++i)
+            {
+                const auto& p1 = data.hRData[i];
+                const auto& p2 = data.hRData[i + 1];
+
+                double segmentX[2] = { static_cast<double>(p1.time), static_cast<double>(p2.time) };
+                double segmentY[2] = { static_cast<double>(p1.hR), static_cast<double>(p2.hR) };
+
+                double intensity = (static_cast<double>(p1.hR) / dataManager.GetHRMax()) * 100.0;
+
+                int zone = 0;
+                if (intensity < data.zones[0]) zone = 0;
+                else if (intensity >= data.zones[0] && intensity < data.zones[1]) zone = 1;
+                else if (intensity >= data.zones[1] && intensity < data.zones[2]) zone = 2;
+                else if (intensity >= data.zones[2] && intensity < data.zones[3]) zone = 3;
+                else if (intensity >= data.zones[3] && intensity < data.zones[4]) zone = 4;
+                else if (intensity >= data.zones[4]) zone = 5;
+
+                ImVec4 zoneColor = ImGui::ColorConvertU32ToFloat4(customColors[zone]);
+
+                ImPlotSpec spec;
+                spec.LineColor = zoneColor;
+                spec.LineWeight = 1.0f;
+
+                if (!legendShown) 
+                {
+                    ImPlot::PlotLine("##HR", segmentX, segmentY, 2, spec);
+                    legendShown = true;
+                }
+                else 
+                {
+                    ImPlot::PlotLine("##HR_Segment", segmentX, segmentY, 2, spec);
+                }
+            }
+        }
+
+        // peaks
+        if (!data.peaksData.empty())
+        {
+            std::vector<double> peakTimes;
+            std::vector<double> peakHRs;
+            peakTimes.reserve(data.peaksData.size());
+            peakHRs.reserve(data.peaksData.size());
+
+            for (const auto& peak : data.peaksData)
+            {
+                peakTimes.push_back(static_cast<double>(peak.time));
+                peakHRs.push_back(static_cast<double>(peak.hR));
+            }
+
+            ImPlotSpec spec;
+            spec.Marker = ImPlotMarker_Circle;
+            spec.MarkerSize = 1.5f;
+            spec.MarkerLineColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            spec.MarkerFillColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+            ImPlot::HideNextItem(true, ImPlotCond_Once);
+            ImPlot::PlotScatter("Peaks", peakTimes.data(), peakHRs.data(), static_cast<int>(peakTimes.size()), spec);
+        }
+
+        // maxHR
         if (data.maxHR > 0 && !data.hRData.empty())
         {
             double peakX = data.hRData[data.maxHRIndex].time;
@@ -356,10 +426,11 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
             ImPlotSpec spec;
             spec.Marker = ImPlotMarker_Circle;
-            spec.MarkerSize = 3.0f;
+            spec.MarkerSize = 4.0f;
             spec.MarkerLineColor = ImVec4(1.0f, 0.25f, 0.25f, 1.0f);
             spec.MarkerFillColor = ImVec4(1.0f, 0.25f, 0.25f, 1.0f);
 
+            ImPlot::HideNextItem(true, ImPlotCond_Once);
             ImPlot::PlotScatter("Max HR", &peakX, &peakY, 1, spec);
 
             //std::string labelText = std::to_string(data.maxHR) + " bpm";
@@ -367,8 +438,6 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
         }
 
         ImPlot::EndPlot();
-
-        //logik für checkbox die jeden peak ab grenze makiert
     }
 
     ImGui::End();
