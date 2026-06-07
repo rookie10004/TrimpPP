@@ -8,8 +8,13 @@
 #include <filesystem>
 #include <array>
 
-#define DIRECTORY "../data/"
-#define AGE 25
+constexpr int DEFAULT_AGE = 25;
+constexpr int SECONDS_AFTER_PEAK = 20;
+const std::string DIRECTORY = "../data/";
+
+constexpr double MAX_TRIMP_PER_HOUR = 300.0;
+constexpr double MAX_PEAKS_PER_HOUR = 150.0;
+constexpr double MAX_RECOVERY_DROP = 50.0;
 
 struct HRData
 {
@@ -31,7 +36,7 @@ struct WorkoutData
 	// HR data
 	std::vector<HRData> hRData;
 	std::vector<HRData> peaksData;
-	std::array<double, 6> zoneDurations = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // min
+	std::array<int, 6> zoneDurations = { 0, 0, 0, 0, 0, 0 }; // sec
 
 	// constants
 	std::array<int, 6> zones;
@@ -62,7 +67,7 @@ struct WorkoutData
 	int peaks;
 	double peaksNorm;
 	int recovery;
-	int recoveryNorm;
+	double recoveryNorm;
 	double performance;
 };
 
@@ -81,7 +86,7 @@ private:
 	/* max HR ~= 220 - age
 		  ~= 200 - 25 = 195
 	*/
-	int hRMax = 220 - AGE;
+	int hRMax = 220 - DEFAULT_AGE;
 	/*	prefactor parameter
 		a + b + c = 1
 		a, b, c ≥ 0
@@ -104,7 +109,7 @@ private:
 	int z4 = 90;
 	int z5 = 100;
 
-	void CalculateZoneDuration();
+	void AnalyzeWorkoutData();
 	void CalculateTrimp();
 	void CalculatePeaks();
 	void CalculateRecovery();

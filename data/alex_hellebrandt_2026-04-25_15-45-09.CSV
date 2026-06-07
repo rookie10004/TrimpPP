@@ -1,9 +1,9 @@
 Name,Sport,Date,Start time,Duration,Total distance (km),Average heart rate (bpm),Average speed (km/h),Max speed (km/h),Average pace (min/km),Max pace (min/km),Calories,Fat percentage of calories(%),Carbohydrate percentage of calories(%),Protein percentage of calories(%),Average cadence (rpm),Average stride length (cm),Running index,Training load,Ascent (m),Descent (m),Average power (W),Max power (W),Notes,Height (cm),Weight (kg),HR max,HR sit,VO2max
-alex hellebrandt,VOLLEYBALL,2026-04-25,15:45:09,1:25:08,,115,,,,,642,,,,,,,,,,,,"30min warm machen, 1 satz, rest pause",181,76,195,55,
+alex hellebrandt,VOLLEYBALL,2026-04-25,15:45:09,01:25:08,,115,,,,,642,,,,,,,,,,,,"30min warm machen, 1 satz, rest pause",181,76,195,55,
 Sample rate,Time,HR (bpm),Speed (km/h),Pace (min/km),Cadence,Altitude (m),Stride length (m),Distances (m),Temperatures (C),Power (W),,,,,,,,,,,,,,,,,,
-1,0:00:00,125,,,,,,,,,
-,0:00:01,126,,,,,,,,,
-,0:00:02,127,,,,,,,,,
+1,0:00:00,125,,,,,,,,,,,,,,,,,,,,,,,,,,
+,0:00:01,126,,,,,,,,,,,,,,,,,,,,,,,,,,
+,0:00:02,127,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,0:00:03,127,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,0:00:04,128,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,0:00:05,128,,,,,,,,,,,,,,,,,,,,,,,,,,

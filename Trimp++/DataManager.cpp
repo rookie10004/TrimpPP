@@ -1,4 +1,4 @@
-#include "DataManager.h"
+﻿#include "DataManager.h"
 
 DataManager::DataManager()
 {
@@ -94,7 +94,7 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
 	std::ifstream file(DIRECTORY + fileName);
 	if (!file.is_open())
 	{
-		std::cerr << "DataManager: Error on opening .csv file" << std::endl;
+		std::cerr << "DataManager: error on opening .csv file" << std::endl;
 		return false;
 	}
 
@@ -209,20 +209,53 @@ bool DataManager::LoadFromCSV(const std::string& fileName)
     }
     file.close();
 
-    CalculateZoneDuration();
-    CalculateTrimp();
+    AnalyzeWorkoutData();
 
     return false;
 }
 
-void DataManager::CalculateZoneDuration()
+void DataManager::AnalyzeWorkoutData()
 {
-    if (workoutData.hRData.empty()) return;
-
-    for (const auto& hrPoint : workoutData.hRData)
+    if (workoutData.hRData.empty())
     {
-        double intensity = (static_cast<double>(hrPoint.hR) / hRMax) * 100.0;
+        std::cerr << "DataManager: no HR-data for calculation/analyzing" << std::endl;
+        return;
+    }
 
+    long long totalHR = 0.0;
+
+    for (int i = 0; i < workoutData.hRData.size(); ++i)
+    {
+        totalHR += workoutData.hRData[i].hR;
+
+        // minHR/maxHR
+        if (workoutData.hRData[i].hR < workoutData.minHR)
+        {
+            workoutData.minHR = workoutData.hRData[i].hR;
+            workoutData.minHRIndex = i;
+        }
+        if (workoutData.hRData[i].hR > workoutData.maxHR)
+        {
+            workoutData.maxHR = workoutData.hRData[i].hR;
+            workoutData.maxHRIndex = i;
+        }
+
+        double intensity = (static_cast<double>(workoutData.hRData[i].hR) / hRMax) * 100.0;
+
+        // peaks
+        if (i > 0 && i < workoutData.hRData.size() - 1)
+        {
+            int prevHR = workoutData.hRData[i - 1].hR;
+            int nextHR = workoutData.hRData[i + 1].hR;
+
+            if (workoutData.hRData[i].hR > prevHR && workoutData.hRData[i].hR > nextHR && intensity >= z0)
+            {
+                workoutData.peaksData.push_back(workoutData.hRData[i]);
+                workoutData.peaks++;
+            }
+        }
+
+        // zone duration
         if (intensity < z0) workoutData.zoneDurations[0]++;
         else if (intensity >= z0 && intensity < z1) workoutData.zoneDurations[1]++;
         else if (intensity >= z1 && intensity < z2) workoutData.zoneDurations[2]++;
@@ -230,91 +263,88 @@ void DataManager::CalculateZoneDuration()
         else if (intensity >= z3 && intensity < z4) workoutData.zoneDurations[4]++;
         else if (intensity >= z4 && intensity <= z5) workoutData.zoneDurations[5]++;
     }
-    workoutData.zoneDurations[0] /= 60;
-    workoutData.zoneDurations[1] /= 60;
-    workoutData.zoneDurations[2] /= 60;
-    workoutData.zoneDurations[3] /= 60;
-    workoutData.zoneDurations[4] /= 60;
-    workoutData.zoneDurations[5] /= 60;
+
+    // avgHR
+    workoutData.avarageHR = static_cast<int>(totalHR / workoutData.hRData.size());
+
+    // time convert in min
+    workoutData.minHRTime = ConvertTimeToString(workoutData.hRData[workoutData.minHRIndex].time);
+    workoutData.maxHRTime = ConvertTimeToString(workoutData.hRData[workoutData.maxHRIndex].time);
+
+    CalculateTrimp();
+    CalculatePeaks();
+    CalculateRecovery();
+    CalculatePerformance();
 }
 
 void DataManager::CalculateTrimp()
 {
-    if (workoutData.hRData.empty())
-    {
-        std::cerr << "DataManager: no HR-Data for TRIMP-calulcation" << std::endl;
-        return;
-    }
-
+    // TRIMP = ∑ (time in HR-zone [min] * HR-zone x)
     double totalTrimp = 0.0;
-    int totalCount = 0;
-    int totalHR = 0;
 
-    for (int i = 0; i < workoutData.hRData.size(); ++i)
-    {
-        int hr = workoutData.hRData[i].hR;
+    totalTrimp += workoutData.zoneDurations[0] * 0.5;
+    totalTrimp += workoutData.zoneDurations[1] * 1.0;
+    totalTrimp += workoutData.zoneDurations[2] * 2.0;
+    totalTrimp += workoutData.zoneDurations[3] * 3.0;
+    totalTrimp += workoutData.zoneDurations[4] * 4.0;
+    totalTrimp += workoutData.zoneDurations[5] * 5.0;
 
-        if (hr > workoutData.maxHR)
-        {
-            workoutData.maxHR = hr;
-            workoutData.maxHRIndex = i;
-        }
-        if (hr < workoutData.minHR)
-        {
-            workoutData.minHR = hr;
-            workoutData.minHRIndex = i;
-        }
+    workoutData.trimp = totalTrimp / 60; // convert in min
 
-        double intensity = (static_cast<double>(hr) / hRMax) * 100.0;
-        double factor = 0.0;
+    // TRIMP_NORM = TRIMP per hour
+    double totalHours = static_cast<double>(workoutData.hRData.back().time) / 3600.0;
+    double trimpPerHour = workoutData.trimp / totalHours;
 
-        if (intensity >= z0 && intensity < z1)
-        {
-            factor = 1.0;
-        }
-        else if (intensity >= z1 && intensity < z2)
-        {
-            factor = 2.0;
-        }
-        else if (intensity >= z2 && intensity < z3)
-        {
-            factor = 3.0;
-        }
-        else if (intensity >= z3 && intensity < z4)
-        {
-            factor = 4.0;
-        }
-        else if (intensity >= z4 && intensity <= z5)
-        {
-            factor = 5.0;
-        }
-        else if (intensity < z0)
-        {
-            factor = 0.5;
-        }
-
-        totalTrimp += factor;
-        totalHR += hr;
-        totalCount++;
-    }
-
-    if (totalCount > 0)
-    {
-        workoutData.avarageHR = totalHR / totalCount;
-    }
-
-    workoutData.minHRTime = ConvertTimeToString(workoutData.hRData[workoutData.minHRIndex].time);
-    workoutData.maxHRTime = ConvertTimeToString(workoutData.hRData[workoutData.maxHRIndex].time);
-
-    workoutData.trimp = totalTrimp / 60.0;
+    workoutData.trimpNorm = std::clamp(trimpPerHour / MAX_TRIMP_PER_HOUR, 0.0, 1.0);
 }
 
 void DataManager::CalculatePeaks()
 {
+    if (workoutData.peaksData.empty())
+    {
+        std::cout << "DataManager: no peak-data for calculation/analyzing" << std::endl;
+        return;
+    }
+
+    // PEAKS = Σ peak
+    workoutData.peaks = static_cast<int>(workoutData.peaksData.size());
+
+    // PEAKS_NORM = PEAKS per hour
+    double totalSeconds = static_cast<double>(workoutData.hRData.back().time);
+    
+    if (totalSeconds > 0.0)
+    {
+        double totalHours = totalSeconds / 3600.0;
+        double peaksPerHour = static_cast<double>(workoutData.peaks) / totalHours;
+
+        workoutData.peaksNorm = std::clamp(peaksPerHour / MAX_PEAKS_PER_HOUR, 0.0, 1.0);
+        return;
+    }
 }
 
 void DataManager::CalculateRecovery()
 {
+    if (workoutData.peaksData.empty())
+    {
+        std::cout << "DataManager: no peak-data for calculation/analyzing" << std::endl;
+        return;
+    }
+
+    // RECOVERY = Σ (HR_peak - HR_after_Xsec)
+    for (int i = 0; i < workoutData.peaksData.size(); i++)
+    {
+        int targetIndex = static_cast<int>(workoutData.peaksData[i].time) + SECONDS_AFTER_PEAK;
+
+        if (targetIndex >= 0 && targetIndex < workoutData.hRData.size())
+        {
+            workoutData.recovery += workoutData.peaksData[i].hR - (workoutData.hRData[targetIndex].hR);
+        }
+    }
+
+    // RECOVERY_NORM = RECOVERY / PEAKS
+    double avgRecoveryDrop = static_cast<double>(workoutData.recovery) / workoutData.peaks;
+
+    workoutData.recoveryNorm = std::clamp(avgRecoveryDrop / MAX_RECOVERY_DROP, 0.0, 1.0);
 }
 
 void DataManager::CalculatePerformance()
@@ -326,7 +356,7 @@ void DataManager::WorkoutDataClear()
 {
     workoutData.hRData.clear();
     workoutData.peaksData.clear();
-    workoutData.zoneDurations.fill(0.0);
+    workoutData.zoneDurations.fill(0);
 
     workoutData.sport = "";
     workoutData.date = "";
@@ -343,6 +373,8 @@ void DataManager::WorkoutDataClear()
     workoutData.maxHR = -1;
     workoutData.minHRIndex = 0;
     workoutData.maxHRIndex = 0;
+    workoutData.minHRTime = "";
+    workoutData.maxHRTime = "";
 
     workoutData.trimp = -1.0;
     workoutData.trimpNorm = -1.0;

@@ -168,14 +168,14 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
 
     ImGui::Text("TRIMP:        %-7.1f", list.trimp);
     ImGui::SameLine(190.0f);
-    ImGui::Text("TRIMP norm:    %-7.1f", list.trimp);
+    ImGui::Text("TRIMP norm:    %.4f", list.trimpNorm);
     ImGui::Text("Peaks:        %d", list.peaks);
     ImGui::SameLine(190.0f);
-    ImGui::Text("Peaks norm:    %-7.1f", list.peaksNorm);
+    ImGui::Text("Peaks norm:    %.4f", list.peaksNorm);
     ImGui::Text("Recovery:     %d", list.recovery);
     ImGui::SameLine(190.0f);
-    ImGui::Text("Recovery norm: %d", list.recoveryNorm);
-    ImGui::Text("Performance:  %-7.1f", list.performance);
+    ImGui::Text("Recovery norm: %.4f", list.recoveryNorm);
+    ImGui::Text("Performance:  %.4f", list.performance);
 
     ImGui::End();
 }
@@ -210,9 +210,9 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
     for (int i = 0; i < 6; ++i)
     {
-        if (data.zoneDurations[i] > 0.0)
+        if (data.zoneDurations[i] > 0)
         {
-            activeCounts.push_back(data.zoneDurations[i]);
+            activeCounts.push_back(data.zoneDurations[i] / 60.0); // convert to min
             activeLabels.push_back(zoneLabels[i].c_str());
         }
     }
