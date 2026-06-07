@@ -126,23 +126,37 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     WorkoutData list = dataManager.GetData();
 
     ImGui::SeparatorText("Basic Data");
-    ImGui::Text("Sport:        %s", list.sport.c_str());
-    ImGui::Text("Date:         %s", list.date.c_str());
-    ImGui::Text("Duration:     %s", list.duration.c_str());
-    ImGui::Text("Day Time:     %s", list.startTime.c_str());
+    ImGui::Text("Sport:       ");
+    ImGui::SameLine();
+    if (!list.sport.empty()) ImGui::Text(list.sport.c_str());
+    else ImGui::Text("-");
+
+    ImGui::Text("Date:        ");
+    ImGui::SameLine();
+    if (!list.date.empty()) ImGui::Text(list.date.c_str());
+    else ImGui::Text("-");
+
+    ImGui::Text("Duration:    ");
+    ImGui::SameLine();
+    if (!list.duration.empty()) ImGui::Text(list.duration.c_str());
+    else ImGui::Text("-");
+
+    ImGui::Text("Day Time:    ");
+    ImGui::SameLine();
+    if (!list.startTime.empty()) ImGui::Text(list.startTime.c_str());
+    else ImGui::Text("-");
+
     ImGui::Text("Calories:     %d kcal", list.calories);
-    ImGui::Text("File:         %s", list.fileName.c_str());
+
+    ImGui::Text("File:        ");
+    ImGui::SameLine();
+    if (!list.fileName.empty()) ImGui::TextWrapped(list.fileName.c_str());
+    else ImGui::Text("-");
+
     ImGui::Text("Notes:       ");
     ImGui::SameLine();
-
-    if (!list.notes.empty())
-    {
-        ImGui::TextWrapped(list.notes.c_str());
-    }
-    else
-    {
-        ImGui::Text("-");
-    }
+    if (!list.notes.empty()) ImGui::TextWrapped(list.notes.c_str());
+    else ImGui::Text("-");
 
     ImGui::SeparatorText("Heart Rate Data");
     ImGui::Text("Avg HR:       %d", list.avarageHR);
@@ -316,8 +330,8 @@ void GUI::ZoneWindow(Display& display, DataManager& dataManager)
 
 void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 {
-    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.75, display.GetHeight() * 0.4), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25, 0), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(display.GetWidth() * 0.75f, display.GetHeight() * 0.4f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(display.GetWidth() * 0.25f, 0), ImGuiCond_Once);
 
     ImGui::Begin("Heart Rate", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollWithMouse);
 
@@ -329,20 +343,20 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
         ImGui::End();
         return;
     }
-    
+
     ImVec2 plotSize = ImGui::GetContentRegionAvail();
 
     if (ImPlot::BeginPlot("##HeartRatePlot", plotSize))
     {
-        ImPlot::SetupAxes("Time [sec]", "Heart Rate [bpm]");
+        ImPlot::SetupAxes("Time [min]", "Heart Rate [bpm]");
 
-        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().time, ImGuiCond_Always);
+        ImPlot::SetupAxisLimits(ImAxis_X1, 0, data.hRData.back().time / 60.0, ImGuiCond_Always);
         ImPlot::SetupAxisLimits(ImAxis_Y1, data.minHR - 10, data.maxHR + 15, ImGuiCond_Always);
 
         // avgHR line
         if (data.avarageHR > 0 && !data.hRData.empty())
         {
-            double avgX[2] = { 0.0, static_cast<double>(data.hRData.back().time) };
+            double avgX[2] = { 0.0, static_cast<double>(data.hRData.back().time) / 60.0 };
             double avgY[2] = { static_cast<double>(data.avarageHR), static_cast<double>(data.avarageHR) };
 
             ImPlotSpec spec;
@@ -363,7 +377,7 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
                 const auto& p1 = data.hRData[i];
                 const auto& p2 = data.hRData[i + 1];
 
-                double segmentX[2] = { static_cast<double>(p1.time), static_cast<double>(p2.time) };
+                double segmentX[2] = { static_cast<double>(p1.time) / 60.0, static_cast<double>(p2.time) / 60.0 };
                 double segmentY[2] = { static_cast<double>(p1.hR), static_cast<double>(p2.hR) };
 
                 double intensity = (static_cast<double>(p1.hR) / dataManager.GetHRMax()) * 100.0;
@@ -382,12 +396,12 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
                 spec.LineColor = zoneColor;
                 spec.LineWeight = 1.0f;
 
-                if (!legendShown) 
+                if (!legendShown)
                 {
                     ImPlot::PlotLine("##HR", segmentX, segmentY, 2, spec);
                     legendShown = true;
                 }
-                else 
+                else
                 {
                     ImPlot::PlotLine("##HR_Segment", segmentX, segmentY, 2, spec);
                 }
@@ -404,7 +418,7 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
             for (const auto& peak : data.peaksData)
             {
-                peakTimes.push_back(static_cast<double>(peak.time));
+                peakTimes.push_back(static_cast<double>(peak.time) / 60.0);
                 peakHRs.push_back(static_cast<double>(peak.hR));
             }
 
@@ -421,7 +435,7 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
         // maxHR
         if (data.maxHR > 0 && !data.hRData.empty())
         {
-            double peakX = data.hRData[data.maxHRIndex].time;
+            double peakX = static_cast<double>(data.hRData[data.maxHRIndex].time) / 60.0;
             double peakY = data.maxHR;
 
             ImPlotSpec spec;
@@ -432,9 +446,6 @@ void GUI::HeartRateWindow(Display& display, DataManager& dataManager)
 
             ImPlot::HideNextItem(true, ImPlotCond_Once);
             ImPlot::PlotScatter("Max HR", &peakX, &peakY, 1, spec);
-
-            //std::string labelText = std::to_string(data.maxHR) + " bpm";
-            //ImPlot::PlotText(labelText.c_str(), peakX, peakY, ImVec2(0, -10));
         }
 
         ImPlot::EndPlot();
