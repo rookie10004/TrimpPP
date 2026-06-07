@@ -19,6 +19,7 @@ private:
 	ImVec4 lightGrey = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 	ImVec4 superLightGrey = ImVec4(0.7f, 0.7f, 0.7f, 1.0f);
 	ImVec4 darkGrey = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+	ImVec4 green = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
 
 	const ImU32 customColors[6] =
     {
@@ -29,6 +30,8 @@ private:
         IM_COL32(250, 136, 22, 255), // orange
         IM_COL32(242, 45,  5, 255)   // rot
     };
+
+	float tooltipSize = 25.0f;
 
 	void SelectionWindow(Display& display, DataManager& dataManager, bool isDirEmpty);
 	void TrainingOverviewWindow(Display& display, DataManager& dataManager);

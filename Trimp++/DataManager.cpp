@@ -279,7 +279,7 @@ void DataManager::AnalyzeWorkoutData()
 
 void DataManager::CalculateTrimp()
 {
-    // TRIMP = ∑ (time in HR-zone [min] * HR-zone x)
+    // TRIMP = ∑ (time_in_zone_min * zone_multiplier)
     double totalTrimp = 0.0;
 
     totalTrimp += workoutData.zoneDurations[0] * 0.5;
@@ -330,7 +330,7 @@ void DataManager::CalculateRecovery()
         return;
     }
 
-    // RECOVERY = Σ (HR_peak - HR_after_Xsec)
+    // RECOVERY = Σ (hr_peak - hr_after_Xsec)
     for (int i = 0; i < workoutData.peaksData.size(); i++)
     {
         int targetIndex = static_cast<int>(workoutData.peaksData[i].time) + SECONDS_AFTER_PEAK;

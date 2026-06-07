@@ -134,6 +134,7 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     ImGui::Text("File:         %s", list.fileName.c_str());
     ImGui::Text("Notes:       ");
     ImGui::SameLine();
+
     if (!list.notes.empty())
     {
         ImGui::TextWrapped(list.notes.c_str());
@@ -150,6 +151,7 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     ImGui::Text("Min HR:       %d", list.minHR);
     ImGui::SameLine(134.0f);
     ImGui::Text("bpm");
+
     if (!list.hRData.empty() && list.minHRIndex >= 0 && list.minHRIndex < list.hRData.size())
     {
         ImGui::SameLine(190.0f);
@@ -167,15 +169,89 @@ void GUI::TrainingOverviewWindow(Display& display, DataManager& dataManager)
     }
 
     ImGui::Text("TRIMP:        %-7.1f", list.trimp);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "TRIMP (Training Impulse):");
+        ImGui::Text("The accumulated training load calculated by weighting the time spent in each heart rate zone.");
+        ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Formula: sum(time_in_zone_min * zone_multiplier)");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::SameLine(190.0f);
     ImGui::Text("TRIMP norm:    %.4f", list.trimpNorm);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Normalized TRIMP:");
+        ImGui::Text("The TRIMP accumulated per hour, normalized against the maximum expected hourly TRIMP threshold.");
+        ImGui::TextColored(lightGrey, "Clamped between 0.0 and 1.0 based on MAX_TRIMP_PER_HOUR = %.2f.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::Text("Peaks:        %d", list.peaks);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Heart Rate Peaks:");
+        ImGui::Text("The total number of detected heart rate peaks where the pulse was higher than its immediate neighbors.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::SameLine(190.0f);
     ImGui::Text("Peaks norm:    %.4f", list.peaksNorm);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Normalized Peaks:");
+        ImGui::Text("The frequency of heart rate peaks per hour, scaled against the maximum expected peaks threshold.");
+        ImGui::TextColored(lightGrey, "Clamped between 0.0 and 1.0 based on MAX_PEAKS_PER_HOUR = %.2f.", MAX_PEAKS_PER_HOUR);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::Text("Recovery:     %d", list.recovery);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Heart Rate Recovery:");
+        ImGui::Text("The sum of all heart rate drops measured exactly %d seconds after each detected peak.", SECONDS_AFTER_PEAK);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
     ImGui::SameLine(190.0f);
     ImGui::Text("Recovery norm: %.4f", list.recoveryNorm);
-    ImGui::Text("Performance:  %.4f", list.performance);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Normalized Recovery:");
+        ImGui::Text("The average heart rate drop per peak, scaled against the target maximum recovery drop threshold.");
+        ImGui::TextColored(lightGrey, "Clamped between 0.0 and 1.0 based on MAX_RECOVERY_DROP = %.2f.", MAX_RECOVERY_DROP);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+
+    ImGui::Text("Performance:  %.4f (%.2f%%)", list.performance, list.performance * 100);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * tooltipSize);
+        ImGui::TextColored(green, "Performance Score:");
+        ImGui::Text("A weighted composite score reflecting overall workout intensity and cardiovascular efficiency.");
+        ImGui::TextColored(lightGrey, "Combines normalized TRIMP, Peaks, and Recovery values.");
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
 
     ImGui::End();
 }
