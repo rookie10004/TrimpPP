@@ -6,6 +6,8 @@ Trimp++ ist eine performante C++ Anwendung zur Analyse und Visualisierung von He
 ![SDL3](https://img.shields.io/badge/Framework-SDL3-green.svg)
 ![ImGui](https://img.shields.io/badge/GUI-Dear%20ImGui-orange.svg)
 
+![Screenshot](img/Screenshot.png)
+
 ## Features
 
 - **Polar CSV-Parser:** Direktes Einlesen und Verarbeiten von standardmäßigen Herzfrequenz-Exporten der Polar-Flow.
