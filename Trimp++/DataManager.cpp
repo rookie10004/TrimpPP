@@ -355,8 +355,8 @@ void DataManager::CalculateRecovery()
 
     for (size_t i = 0; i < workoutData.peaksData.size(); i++)
     {
-        double currentPeakTime = workoutData.peaksData[i].time;
-        double targetTime = currentPeakTime + SECONDS_AFTER_PEAK;
+        int currentPeakTime = workoutData.peaksData[i].time;
+        int targetTime = currentPeakTime + SECONDS_AFTER_PEAK;
 
         bool nextPeakInterrupted = false;
         if (i + 1 < workoutData.peaksData.size())
@@ -367,10 +367,34 @@ void DataManager::CalculateRecovery()
             }
         }
 
-        if (!nextPeakInterrupted)
-        {
-            int targetIndex = static_cast<int>(targetTime);
+        if (nextPeakInterrupted) continue;
 
+        bool validRecoveryPhase = true;
+        int lastHR = workoutData.peaksData[i].hR;
+
+        for (int t = currentPeakTime + 1; t <= targetTime; ++t)
+        {
+            if (t >= 0 && t < static_cast<int>(workoutData.hRData.size()))
+            {
+                int currentHR = workoutData.hRData[t].hR;
+
+                if (currentHR > lastHR)
+                {
+                    validRecoveryPhase = false;
+                    break;
+                }
+                lastHR = currentHR;
+            }
+            else
+            {
+                validRecoveryPhase = false;
+                break;
+            }
+        }
+
+        if (validRecoveryPhase)
+        {
+            int targetIndex = targetTime;
             if (targetIndex >= 0 && targetIndex < static_cast<int>(workoutData.hRData.size()))
             {
                 double peakHR = workoutData.peaksData[i].hR;

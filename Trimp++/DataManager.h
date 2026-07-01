@@ -14,7 +14,7 @@ const std::string DIRECTORY = "../data/";
 
 constexpr double MAX_TRIMP_PER_HOUR = 300.0;
 constexpr double MAX_PEAKS_PER_HOUR = 350.0;
-constexpr double MAX_RECOVERY_DROP = 50.0;
+constexpr double MAX_RECOVERY_DROP = 30.0;
 
 struct HRData
 {
