@@ -351,20 +351,49 @@ void DataManager::CalculateRecovery()
     }
 
     // RECOVERY = Σ (hr_peak - hr_after_Xsec)
-    for (int i = 0; i < workoutData.peaksData.size(); i++)
-    {
-        int targetIndex = static_cast<int>(workoutData.peaksData[i].time) + SECONDS_AFTER_PEAK;
+    int evaluablePeaksCount = 0; 
 
-        if (targetIndex >= 0 && targetIndex < workoutData.hRData.size())
+    for (size_t i = 0; i < workoutData.peaksData.size(); i++)
+    {
+        double currentPeakTime = workoutData.peaksData[i].time;
+        double targetTime = currentPeakTime + SECONDS_AFTER_PEAK;
+
+        bool nextPeakInterrupted = false;
+        if (i + 1 < workoutData.peaksData.size())
         {
-            workoutData.recovery += workoutData.peaksData[i].hR - (workoutData.hRData[targetIndex].hR);
+            if (workoutData.peaksData[i + 1].time < targetTime)
+            {
+                nextPeakInterrupted = true;
+            }
+        }
+
+        if (!nextPeakInterrupted)
+        {
+            int targetIndex = static_cast<int>(targetTime);
+
+            if (targetIndex >= 0 && targetIndex < static_cast<int>(workoutData.hRData.size()))
+            {
+                double peakHR = workoutData.peaksData[i].hR;
+                double afterHR = workoutData.hRData[targetIndex].hR;
+
+                workoutData.recovery += (peakHR - afterHR);
+                evaluablePeaksCount++;
+            }
         }
     }
 
     // RECOVERY_NORM = RECOVERY / PEAKS
-    double avgRecoveryDrop = static_cast<double>(workoutData.recovery) / workoutData.peaks;
+    if (evaluablePeaksCount > 0)
+    {
+        double avgRecoveryDrop = workoutData.recovery / evaluablePeaksCount;
 
-    workoutData.recoveryNorm = std::clamp(avgRecoveryDrop / MAX_RECOVERY_DROP, 0.0, 1.0);
+        workoutData.recoveryNorm = std::clamp(avgRecoveryDrop / MAX_RECOVERY_DROP, 0.0, 1.0);
+    }
+    else
+    {
+        workoutData.recoveryNorm = 0.0;
+        std::cout << "DataManager: Warning - No evaluable recovery phases found (All peaks clustered)" << std::endl;
+    }
 }
 
 void DataManager::CalculatePerformance()

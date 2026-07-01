@@ -13,7 +13,7 @@ constexpr int SECONDS_AFTER_PEAK = 20;
 const std::string DIRECTORY = "../data/";
 
 constexpr double MAX_TRIMP_PER_HOUR = 300.0;
-constexpr double MAX_PEAKS_PER_HOUR = 150.0;
+constexpr double MAX_PEAKS_PER_HOUR = 350.0;
 constexpr double MAX_RECOVERY_DROP = 50.0;
 
 struct HRData
@@ -86,7 +86,7 @@ private:
 	/* max HR ~= 220 - age
 		  ~= 200 - 25 = 195
 	*/
-	int hRMax = 220 - DEFAULT_AGE;
+	int hRMax = 191;
 	/*	prefactor parameter
 		a + b + c = 1
 		a, b, c ≥ 0
