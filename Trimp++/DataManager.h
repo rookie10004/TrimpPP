@@ -12,9 +12,9 @@ constexpr int DEFAULT_AGE = 25;
 constexpr int SECONDS_AFTER_PEAK = 20;
 const std::string DIRECTORY = "../data/";
 
-constexpr double MAX_TRIMP_PER_HOUR = 300.0;
-constexpr double MAX_PEAKS_PER_HOUR = 350.0;
-constexpr double MAX_RECOVERY_DROP = 30.0;
+constexpr double MAX_TRIMP_PER_HOUR = 160.0;
+constexpr double MAX_PEAKS_PER_HOUR = 330.0;
+constexpr double MAX_RECOVERY_DROP = 24.0;
 
 struct HRData
 {

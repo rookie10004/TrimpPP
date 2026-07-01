@@ -435,27 +435,27 @@ void DataManager::WorkoutDataClear()
     workoutData.date = "";
     workoutData.duration = "";
     workoutData.fileName = "";
-    workoutData.calories = -1;
-    workoutData.height = -1;
-    workoutData.weight = -1.0;
+    workoutData.calories = 0;
+    workoutData.height = 0;
+    workoutData.weight = 0.0;
     workoutData.notes = "";
     workoutData.startTime = "";
 
-    workoutData.avarageHR = -1;
+    workoutData.avarageHR = 0;
     workoutData.minHR = 999;
-    workoutData.maxHR = -1;
+    workoutData.maxHR = 0;
     workoutData.minHRIndex = 0;
     workoutData.maxHRIndex = 0;
     workoutData.minHRTime = "";
     workoutData.maxHRTime = "";
 
-    workoutData.trimp = -1.0;
-    workoutData.trimpNorm = -1.0;
-    workoutData.peaks = -1;
-    workoutData.peaksNorm = -1.0;
-    workoutData.recovery = -1;
-    workoutData.recoveryNorm = -1;
-    workoutData.performance = -1.0;
+    workoutData.trimp = 0.0;
+    workoutData.trimpNorm = 0.0;
+    workoutData.peaks = 0;
+    workoutData.peaksNorm = 0.0;
+    workoutData.recovery = 0;
+    workoutData.recoveryNorm = 0;
+    workoutData.performance = 0.0;
 }
 
 std::string DataManager::ConvertTimeToString(int totalSeconds)
