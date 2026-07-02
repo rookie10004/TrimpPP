@@ -11,14 +11,15 @@ Trimp++ ist eine performante C++ Anwendung zur Analyse und Visualisierung von He
 ## Features
 
 - **Polar CSV-Parser:** Direktes Einlesen und Verarbeiten von standardmäßigen Herzfrequenz-Exporten der Polar-Flow.
-- **Interaktive Graphen:** Visualisierung des Herzfrequenzverlaufs über die Zeit (in Minuten) mit zonenbasierter Einfärbung der Kurve.
+- **Interaktive Graphen:** Visualisierung des Herzfrequenzverlaufs über die Zeit mit zonenbasierter Einfärbung der Kurve.
 - **Peak-Erkennung:** Intelligenter Algorithmus zur Erkennung von echten Belastungsspitzen (fängt auch konstante Herzfrequenz-Plateaus fehlerfrei ab).
-- **Zonen-Auswertung:** Präzise Aufschlüsselung der Trainingsdauer in den einzelnen Intensitätszonen (Z1 bis Z5).
+- **Zonen-Auswertung:** Präzise Aufschlüsselung der Trainingsdauer in den einzelnen Intensitätszonen.
+- **Interaktive Legende:** Ein- und Ausblenden von Durchschnittslinie, Peaks und Max HR direkt über die Plot-Legende.
 - **Sportwissenschaftliche Metriken:**
   - Berechnung des Trainingsimpulses (**TRIMP**).
   - Ermittlung von Durchschnitts-, Minimal- und Maximal-Herzfrequenz samt präzisem Zeitstempel.
+  - Berechnung von Anzahl der Peaks.
   - Auswertung von Erholungsherzfrequenz (Recovery) und Performance-Scores.
-- **Interaktive Legende:** Ein- und Ausblenden von Durchschnittslinie, Peaks und Max HR direkt über die Plot-Legende.
 
 ## Benutzeroberfläche (UI)
 
@@ -32,9 +33,9 @@ Die Anwendung ist in vier funktionale Fenster unterteilt:
 
 - **Sprache:** C++20 (oder höher)
 - **Frameworks & Bibliotheken:**
-  - **SDL3** (Window-Management & Rendering-Kontext)
-  - **Dear ImGui** (Modulare UI-Komponenten)
-  - **ImPlot** (Hochperformantes Plotten von Datenreihen)
+  - **SDL3**
+  - **Dear ImGui**
+  - **ImPlot**
 - **Unterstützte Betriebssysteme:** Windows (MSVC / Visual Studio), Linux, macOS
 
 ## Projektstruktur
