@@ -1,6 +1,6 @@
 # Trimp++ 
 
-Trimp++ ist eine performante C++ Anwendung zur Analyse und Visualisierung von Herzfrequenzdaten aus Sport-Workouts (CSV-Dateien). Die Software berechnet wichtige sportwissenschaftliche Kennzahlen wie den **TRIMP** (Training Impulse) und bietet eine grafische Echtzeit-Oberfläche zur Auswertung von Trainingszonen und Belastungspeaks.
+Trimp++ ist eine performante C++ Anwendung zur Analyse und Visualisierung von Herzfrequenzdaten aus Sport-Workouts (CSV-Dateien). Die Software berechnet wichtige sportwissenschaftliche Kennzahlen wie den **TRIMP** (Training Impulse) und bietet eine grafische Oberfläche zur Auswertung von Trainingszonen und Belastungspeaks.
 
 ![C++](https://img.shields.io/badge/Language-C%2B%2B-blue.svg)
 ![SDL3](https://img.shields.io/badge/Framework-SDL3-green.svg)
